@@ -1,0 +1,1650 @@
+/* Authenticated workspace shell. Keep this before user.css so custom CSS remains authoritative. */
+:root {
+    --st-shell-rail-width: clamp(13.5rem, 17vw, 15rem);
+    --st-shell-header-height: 4.25rem;
+    --st-shell-mobile-header-height: 3.5rem;
+    --st-shell-legacy-toolbar-height: 0px;
+    --st-shell-workspace-top: calc(var(--st-shell-header-height) + var(--st-shell-legacy-toolbar-height));
+    --st-shell-mobile-workspace-top: calc(var(--st-shell-mobile-header-height) + var(--st-shell-legacy-toolbar-height));
+    --st-shell-mobile-nav-height: calc(4rem + env(safe-area-inset-bottom, 0px));
+    --st-shell-accent: #c64b52;
+    --st-shell-accent-soft: rgba(198, 75, 82, 0.16);
+    --st-shell-surface: var(--SmartThemeBlurTintColor);
+    --st-shell-ground: var(--SmartThemeChatTintColor);
+    --st-shell-line: var(--SmartThemeBorderColor);
+    --st-shell-muted: var(--SmartThemeEmColor);
+    --st-shell-radius: 0.875rem;
+}
+
+html:has(#st-shell-rail) {
+    width: 100%;
+    height: 100%;
+}
+
+body.st-shell-has-legacy-top-bar:not(.movingUI) {
+    --st-shell-legacy-toolbar-height: 3rem;
+    --st-shell-workspace-top: calc(var(--st-shell-header-height) + var(--st-shell-legacy-toolbar-height));
+    --st-shell-mobile-workspace-top: calc(var(--st-shell-mobile-header-height) + var(--st-shell-legacy-toolbar-height));
+}
+
+.st-shell-visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.st-shell-skip-link {
+    position: fixed;
+    z-index: 100000;
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.65rem 0.9rem;
+    color: var(--SmartThemeBodyColor);
+    background: var(--st-shell-surface);
+    border: 1px solid var(--st-shell-line);
+    border-radius: 0.5rem;
+    transform: translateY(-150%);
+    transition: transform var(--animation-duration-2x) ease;
+}
+
+.st-shell-skip-link:focus {
+    outline: 2px solid var(--st-shell-accent);
+    outline-offset: 3px;
+    transform: translateY(0);
+}
+
+:is(#st-shell-rail, #st-workspace-header, #st-shell-mobile-nav, #st-shell-more) button,
+#st-shell-language {
+    font: inherit;
+}
+
+:is(#st-shell-rail, #st-workspace-header, #st-shell-mobile-nav, #st-shell-more) button:focus-visible,
+#st-shell-language:focus-visible,
+.welcomePanel :is(button, a):focus-visible {
+    outline: 2px solid var(--interactable-outline-color);
+    outline-offset: 2px;
+}
+
+#st-shell-rail {
+    position: fixed;
+    z-index: 3100;
+    inset: 0 auto 0 0;
+    width: var(--st-shell-rail-width);
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    color: var(--SmartThemeBodyColor);
+    background: var(--st-shell-surface);
+    border-right: 1px solid var(--st-shell-line);
+    box-shadow: 1.25rem 0 3rem rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(calc(var(--SmartThemeBlurStrength) * 1.4));
+    -webkit-backdrop-filter: blur(calc(var(--SmartThemeBlurStrength) * 1.4));
+}
+
+.st-shell-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: var(--st-shell-header-height);
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--st-shell-line);
+    font-size: 1rem;
+    font-weight: 750;
+    letter-spacing: 0.01em;
+}
+
+.st-shell-brand img {
+    width: 2rem;
+    height: 2rem;
+    object-fit: contain;
+}
+
+.st-shell-rail-nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0.8rem 0.65rem 1rem;
+}
+
+.st-shell-nav-group + .st-shell-nav-group {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--st-shell-line);
+}
+
+.st-shell-nav-label {
+    padding: 0 0.65rem 0.35rem;
+    color: var(--st-shell-muted);
+    font-size: 0.67rem;
+    font-weight: 750;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    opacity: 0.78;
+}
+
+.st-shell-nav-item,
+.st-shell-connection {
+    appearance: none;
+    width: 100%;
+    min-height: 2.75rem;
+    display: grid;
+    grid-template-columns: 1.25rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0.7rem;
+    color: var(--SmartThemeBodyColor);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0.65rem;
+    text-align: left;
+    cursor: pointer;
+    opacity: 0.76;
+    transition: color var(--animation-duration-2x) ease,
+        opacity var(--animation-duration-2x) ease;
+}
+
+.st-shell-nav-item span,
+.st-shell-connection span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.st-shell-nav-item i,
+.st-shell-connection i {
+    justify-self: center;
+    color: var(--st-shell-muted);
+}
+
+.st-shell-nav-item:hover,
+.st-shell-connection:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.055);
+    border-color: var(--st-shell-line);
+}
+
+.st-shell-nav-item.is-active,
+.st-shell-connection.is-active {
+    opacity: 1;
+    color: var(--SmartThemeBodyColor);
+    background: var(--st-shell-accent-soft);
+    border-color: rgba(198, 75, 82, 0.36);
+}
+
+.st-shell-nav-item.is-active {
+    box-shadow: none;
+}
+
+.st-shell-nav-item.is-active i,
+.st-shell-connection.is-active i {
+    color: var(--st-shell-accent);
+}
+
+#st-shell-rail > .st-shell-connection {
+    flex: 0 0 auto;
+    margin: 0.75rem;
+    width: calc(100% - 1.5rem);
+    border-top: 1px solid var(--st-shell-line);
+}
+
+.st-shell-connected,
+.st-shell-disconnected {
+    display: none;
+}
+
+body.st-shell-is-connected .st-shell-connected,
+body:not(.st-shell-is-connected) .st-shell-disconnected {
+    display: block;
+}
+
+body.st-shell-is-connected .st-shell-connection i {
+    color: #68b47b;
+}
+
+body:not(.st-shell-is-connected) .st-shell-connection i {
+    color: var(--st-shell-accent);
+}
+
+#st-workspace-header {
+    position: fixed;
+    z-index: 3100;
+    top: 0;
+    right: 0;
+    left: var(--st-shell-rail-width);
+    height: var(--st-shell-header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.65rem clamp(1rem, 2.5vw, 2.25rem);
+    color: var(--SmartThemeBodyColor);
+    background: var(--st-shell-surface);
+    border-bottom: 1px solid var(--st-shell-line);
+    backdrop-filter: blur(calc(var(--SmartThemeBlurStrength) * 1.4));
+    -webkit-backdrop-filter: blur(calc(var(--SmartThemeBlurStrength) * 1.4));
+}
+
+.st-workspace-heading {
+    min-width: 0;
+}
+
+.st-workspace-eyebrow {
+    display: block;
+    color: var(--st-shell-muted);
+    font-size: 0.65rem;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+
+#st-workspace-title {
+    margin: 0.1rem 0 0;
+    overflow: hidden;
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    font-weight: 720;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.st-workspace-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.55rem;
+}
+
+.st-shell-character-details,
+.st-shell-character-context-close {
+    display: none;
+}
+
+.st-shell-connection-chip {
+    width: auto;
+    min-width: 0;
+    grid-template-columns: auto auto;
+    padding-inline: 0.75rem;
+    border-color: var(--st-shell-line);
+}
+
+.st-shell-language-label {
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.25rem 0.45rem 0.25rem 0.7rem;
+    color: var(--st-shell-muted);
+    border: 1px solid var(--st-shell-line);
+    border-radius: 0.65rem;
+    background: rgba(0, 0, 0, 0.08);
+}
+
+#st-shell-language {
+    width: auto;
+    min-width: 5.5rem;
+    max-width: 10rem;
+    min-height: 2.5rem;
+    margin: 0;
+    padding: 0.35rem 1.75rem 0.35rem 0.6rem;
+    appearance: none;
+    color: var(--SmartThemeBodyColor);
+    background-color: rgba(255, 255, 255, 0.055);
+    border: 1px solid var(--st-shell-line);
+    border-radius: 0.45rem;
+}
+
+#st-shell-mobile-nav {
+    display: none;
+}
+
+#st-shell-more {
+    color: var(--SmartThemeBodyColor);
+    background: var(--st-shell-surface);
+    border: 1px solid var(--st-shell-line);
+}
+
+#st-shell-more:not([open]) {
+    display: none;
+}
+
+#st-shell-more::backdrop {
+    background: rgba(0, 0, 0, 0.58);
+    backdrop-filter: blur(2px);
+}
+
+.st-shell-more-header {
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3.5rem;
+    padding: 0.5rem 0.85rem;
+    background: var(--st-shell-surface);
+    border-bottom: 1px solid var(--st-shell-line);
+}
+
+.st-shell-more-header h2 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+#st-shell-more-close {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    margin: 0;
+}
+
+.st-shell-more-content {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.65rem;
+}
+
+.st-shell-extension-group:not(:has(.st-shell-extension-route)),
+#st-shell-extension-routes:empty {
+    display: none;
+}
+
+#st-shell-desktop-extension-routes {
+    display: grid;
+    gap: 0.35rem;
+}
+
+#st-shell-extension-routes:not(:empty) {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid var(--st-shell-line);
+}
+
+/* Preserve legacy extension mounts while routing drawer controls through the new shell. */
+:where(body:not(.movingUI)) #top-bar {
+    display: none;
+}
+
+:where(body.st-shell-has-legacy-top-bar:not(.movingUI)) #top-bar {
+    position: fixed;
+    z-index: 3095;
+    top: var(--st-shell-header-height);
+    right: 0;
+    left: var(--st-shell-rail-width);
+    width: auto;
+    height: var(--st-shell-legacy-toolbar-height);
+    margin: 0;
+    padding: 0.2rem clamp(1rem, 2.5vw, 2.25rem);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    color: var(--SmartThemeBodyColor);
+    background: var(--st-shell-surface);
+    border-bottom: 1px solid var(--st-shell-line);
+    box-shadow: none;
+    backdrop-filter: blur(calc(var(--SmartThemeBlurStrength) * 1.4));
+    -webkit-backdrop-filter: blur(calc(var(--SmartThemeBlurStrength) * 1.4));
+}
+
+:where(body.st-shell-has-legacy-top-bar:not(.movingUI)) #top-bar > * {
+    flex: 0 0 auto;
+}
+
+:where(body:not(.movingUI)) #top-settings-holder {
+    position: fixed;
+    z-index: 3090;
+    top: 0.7rem;
+    right: 15rem;
+    left: auto;
+    width: auto;
+    height: 2.75rem;
+    margin: 0;
+    justify-content: flex-end;
+    pointer-events: none;
+}
+
+:where(body:not(.movingUI)) #top-settings-holder > :is(
+    #ai-config-button,
+    #sys-settings-button,
+    #advanced-formatting-button,
+    #WI-SP-button,
+    #user-settings-button,
+    #backgrounds-button,
+    #extensions-settings-button,
+    #persona-management-button,
+    #rightNavHolder
+) {
+    width: 0;
+    height: 0;
+    flex: 0 0 0;
+    pointer-events: none;
+}
+
+:where(body:not(.movingUI)) #top-settings-holder > :is(
+    #ai-config-button,
+    #sys-settings-button,
+    #advanced-formatting-button,
+    #WI-SP-button,
+    #user-settings-button,
+    #backgrounds-button,
+    #extensions-settings-button,
+    #persona-management-button,
+    #rightNavHolder
+) > .drawer-toggle {
+    display: none;
+}
+
+:where(body:not(.movingUI)) #top-settings-holder > :is(
+    #ai-config-button,
+    #sys-settings-button,
+    #advanced-formatting-button,
+    #WI-SP-button,
+    #user-settings-button,
+    #backgrounds-button,
+    #extensions-settings-button,
+    #persona-management-button,
+    #rightNavHolder
+) > .drawer-content,
+:where(body:not(.movingUI)) #top-settings-holder > :is(#floatingPrompt, #cfgConfig, #logprobsViewer),
+:where(body:not(.movingUI)) #top-settings-holder > .drawer:not(:is(
+    #ai-config-button,
+    #sys-settings-button,
+    #advanced-formatting-button,
+    #WI-SP-button,
+    #user-settings-button,
+    #backgrounds-button,
+    #extensions-settings-button,
+    #persona-management-button,
+    #rightNavHolder
+)) {
+    pointer-events: auto;
+}
+
+:where(body:not(.movingUI)) #top-settings-holder > .drawer:not(:is(
+    #ai-config-button,
+    #sys-settings-button,
+    #advanced-formatting-button,
+    #WI-SP-button,
+    #user-settings-button,
+    #backgrounds-button,
+    #extensions-settings-button,
+    #persona-management-button,
+    #rightNavHolder
+)) {
+    width: auto;
+    min-width: 2.75rem;
+}
+
+:where(body.movingUI) :is(#st-shell-rail, #st-workspace-header, #st-shell-mobile-nav, #st-shell-more, .st-shell-skip-link) {
+    display: none;
+}
+
+:where(body:not(.movingUI)) #sheld {
+    position: fixed;
+    top: var(--st-shell-workspace-top);
+    right: 0;
+    bottom: 0;
+    left: var(--st-shell-rail-width);
+    width: calc(100dvw - var(--st-shell-rail-width));
+    height: calc(100dvh - var(--st-shell-workspace-top));
+    max-width: none;
+    max-height: none;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    overflow: hidden;
+    resize: none;
+}
+
+:where(body:not(.movingUI)) #sheldheader {
+    display: none;
+}
+
+:where(body:not(.movingUI)) #chat {
+    position: relative;
+    bottom: 0;
+    min-height: 0;
+    max-height: none;
+    padding: clamp(1rem, 2vw, 1.75rem) clamp(0.75rem, 2.5vw, 2.25rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    border: 0;
+    background-color: var(--st-shell-ground);
+}
+
+:where(body:not(.movingUI)) #chat:not(:has(> .welcomePanel))::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    top: 1.5rem;
+    bottom: 1.5rem;
+    left: max(2.55rem, calc((100% - 55rem) / 2 + 2.55rem));
+    width: 2px;
+    border-radius: 99px;
+    background: linear-gradient(to bottom, transparent, var(--st-shell-accent) 8%, var(--st-shell-accent) 92%, transparent);
+    opacity: 0.82;
+    pointer-events: none;
+}
+
+:where(body:not(.movingUI)) #chat > .mes {
+    z-index: 1;
+    width: min(100%, 55rem);
+    margin-inline: auto;
+    padding: 0.8rem 0.75rem;
+    border-radius: 0.65rem;
+    transition: background-color var(--animation-duration-2x) ease;
+}
+
+:where(body:not(.movingUI)) #chat > .mes:not(.smallSysMes):hover {
+    background: rgba(255, 255, 255, 0.035);
+}
+
+:where(body:not(.movingUI)) #chat > .mes .avatar {
+    flex: 0 0 auto;
+    box-shadow: 0 0 0 3px var(--st-shell-ground);
+}
+
+:where(body:not(.movingUI)) #chat > .mes .mes_block {
+    min-width: 0;
+}
+
+:where(body:not(.movingUI)) #chat > .smallSysMes {
+    width: min(100%, 45rem);
+    opacity: 0.78;
+}
+
+:where(body:not(.movingUI)) #form_sheld {
+    flex: 0 0 auto;
+    width: 100%;
+    margin: 0;
+    padding: 0.7rem clamp(0.75rem, 2.5vw, 2.25rem) max(0.7rem, env(safe-area-inset-bottom, 0px));
+    background: var(--st-shell-surface);
+    border-top: 1px solid var(--st-shell-line);
+}
+
+:where(body:not(.movingUI)) #send_form {
+    width: min(100%, 57.5rem);
+    min-height: 3.35rem;
+    margin: 0 auto;
+    border: 1px solid var(--st-shell-line);
+    border-radius: var(--st-shell-radius);
+    background: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 0.6rem 1.8rem rgba(0, 0, 0, 0.14);
+    overflow: hidden;
+}
+
+:where(body:not(.movingUI)) #send_form.no-connection {
+    border-color: rgba(198, 75, 82, 0.62);
+    box-shadow: inset 3px 0 0 var(--st-shell-accent);
+}
+
+:where(body:not(.movingUI)) #nonQRFormItems {
+    min-width: 0;
+    align-items: flex-end;
+    gap: 0.2rem;
+    padding: 0.2rem;
+}
+
+:where(body:not(.movingUI)) #send_textarea {
+    min-width: 0;
+    min-height: 2.9rem;
+    padding: 0.75rem 0.55rem;
+    border: 0;
+    background-color: transparent;
+    line-height: 1.45;
+}
+
+:where(body:not(.movingUI)) #send_textarea::placeholder {
+    text-align: left;
+}
+
+:where(body:not(.movingUI)) :is(#leftSendForm, #rightSendForm) > div,
+:where(body:not(.movingUI)) #options_button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border-radius: 0.6rem;
+}
+
+:where(body:not(.movingUI)) #send_but {
+    color: #fff;
+    background: var(--st-shell-accent);
+    opacity: 1;
+}
+
+:where(body:not(.movingUI))[data-generating="true"] #send_form,
+:where(body:not(.movingUI))[data-swiping="true"] #send_form {
+    border-color: rgba(198, 75, 82, 0.62);
+}
+
+/* Core drawers become workspace routes, while their original IDs and event hooks stay intact. */
+:where(body:not(.movingUI)) :is(
+    #left-nav-panel,
+    #rm_api_block,
+    #AdvancedFormatting,
+    #WorldInfo,
+    #user-settings-block,
+    #Backgrounds,
+    #rm_extensions_block,
+    #PersonaManagement,
+    #right-nav-panel,
+    .st-shell-extension-panel
+) {
+    position: fixed;
+    z-index: 3050;
+    top: var(--st-shell-workspace-top);
+    right: 0;
+    bottom: 0;
+    left: var(--st-shell-rail-width);
+    width: calc(100dvw - var(--st-shell-rail-width));
+    height: calc(100dvh - var(--st-shell-workspace-top));
+    min-width: 0;
+    min-height: 0;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: var(--st-shell-ground);
+    transform: none;
+    transition: none;
+}
+
+:where(body:not(.movingUI)) :is(
+    #left-nav-panel,
+    #rm_api_block,
+    #AdvancedFormatting,
+    #WorldInfo,
+    #user-settings-block,
+    #Backgrounds,
+    #rm_extensions_block,
+    #PersonaManagement,
+    .st-shell-extension-panel
+).openDrawer {
+    padding: clamp(1rem, 2.5vw, 2.25rem);
+}
+
+:where(body:not(.movingUI)) :is(
+    #left-nav-panel,
+    #rm_api_block,
+    #AdvancedFormatting,
+    #WorldInfo,
+    #user-settings-block,
+    #Backgrounds,
+    #rm_extensions_block,
+    #PersonaManagement,
+    .st-shell-extension-panel
+) > .scrollableInner {
+    width: min(100%, 72rem);
+    margin-inline: auto;
+}
+
+:where(body:not(.movingUI)) #right-nav-panel {
+    padding: 0;
+}
+
+/* Welcome and recent conversations */
+:where(body:not(.movingUI)) #chat:has(> .welcomePanel) {
+    padding: 0;
+}
+
+body:not(.movingUI).st-shell-home-opening #chat > :not(.welcomePanel),
+body:not(.movingUI) #chat:has(> .welcomePanel[data-shell-preserves-chat]) > :not(.welcomePanel) {
+    display: none;
+}
+
+:where(body:not(.movingUI)) .welcomePanel {
+    width: min(100%, 76rem);
+    margin: 0 auto;
+    padding: clamp(1rem, 3vw, 2.5rem);
+    gap: 0;
+}
+
+.welcomePanel .welcomeHero {
+    position: relative;
+    min-height: clamp(13rem, 30vh, 19rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(10rem, 0.7fr);
+    align-items: center;
+    gap: clamp(1rem, 4vw, 4rem);
+    padding: clamp(1.25rem, 4vw, 3.5rem);
+    overflow: hidden;
+    border: 1px solid var(--st-shell-line);
+    border-radius: 1.25rem;
+    background: linear-gradient(135deg, rgba(198, 75, 82, 0.13), transparent 48%), var(--st-shell-surface);
+    box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, 0.12);
+}
+
+.welcomeHeroCopy {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+}
+
+.welcomePanel .welcomeKicker {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+    color: var(--st-shell-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.welcomePanel .welcomeHeaderLogo {
+    width: 1.75rem;
+    height: 1.75rem;
+}
+
+.welcomePanel .welcomeHeaderVersionDisplay {
+    flex-grow: 0;
+    font-size: inherit;
+}
+
+.welcomePanel .welcomeHero h2 {
+    max-width: 14ch;
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 4.2rem);
+    font-weight: 760;
+    letter-spacing: -0.045em;
+    line-height: 0.98;
+}
+
+.welcomePanel .welcomeHero p {
+    margin: 1rem 0 0;
+    color: var(--st-shell-muted);
+    font-size: clamp(0.95rem, 1.7vw, 1.15rem);
+}
+
+.welcomePrimaryActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 1.5rem;
+}
+
+.welcomePanel .welcomePrimaryActions .menu_button {
+    min-height: 2.75rem;
+    margin: 0;
+    padding-inline: 0.9rem;
+    border-radius: 0.65rem;
+}
+
+.welcomePanel .welcomePrimaryActions .menu_button:first-child {
+    color: #fff;
+    background: var(--st-shell-accent);
+    border-color: var(--st-shell-accent);
+}
+
+.welcomeHeroMark {
+    justify-self: center;
+    display: grid;
+    place-items: center;
+    width: clamp(8rem, 18vw, 13rem);
+    aspect-ratio: 1;
+    color: var(--st-shell-accent);
+    border: 1px solid rgba(198, 75, 82, 0.32);
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--st-shell-accent-soft), transparent 68%);
+    font-size: clamp(3.5rem, 8vw, 6.5rem);
+    transform: rotate(-8deg);
+}
+
+.welcomePanel .welcomeHeaderTitle {
+    min-height: 2.75rem;
+    justify-content: flex-end;
+    gap: 0.3rem;
+    margin: 1.25rem 0 -2.75rem;
+    position: relative;
+    z-index: 1;
+}
+
+.welcomePanel .welcomeHeaderTitle .mes_button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 0;
+    color: var(--SmartThemeBodyColor);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0.55rem;
+    cursor: pointer;
+}
+
+.welcomePanel .welcomeHeaderTitle .mes_button:hover {
+    background: rgba(255, 255, 255, 0.055);
+    border-color: var(--st-shell-line);
+}
+
+.welcomePanel .welcomeHeader {
+    min-height: 3.5rem;
+    margin-top: 1.25rem;
+    padding-right: 8.5rem;
+    border-bottom: 1px solid var(--st-shell-line);
+}
+
+.welcomePanel .recentChatsTitle {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    font-weight: 720;
+}
+
+.welcomePanel .welcomeShortcuts {
+    justify-content: flex-end;
+}
+
+.welcomePanel .welcomeShortcuts .menu_button {
+    min-height: 2.75rem;
+    margin: 0;
+}
+
+.welcomePanel .welcomeRecent {
+    padding-top: 0.8rem;
+}
+
+.welcomeRecent .recentChatList {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+.welcomeRecent .recentChatList .recentChat {
+    position: relative;
+    min-width: 0;
+    min-height: 6.5rem;
+    margin: 0;
+    padding: 0.85rem;
+    border-color: var(--st-shell-line);
+    border-radius: 0.8rem;
+    background: rgba(255, 255, 255, 0.025);
+    transition: border-color var(--animation-duration-2x) ease, background-color var(--animation-duration-2x) ease;
+}
+
+.welcomeRecent .recentChatOpen {
+    appearance: none;
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: inherit;
+}
+
+.welcomeRecent .recentChat > :not(.recentChatOpen) {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.welcomeRecent .recentChat .chatActions,
+.welcomeRecent .recentChat .chatActions * {
+    pointer-events: auto;
+}
+
+.welcomeRecent .recentChat:has(.recentChatOpen:focus-visible) {
+    outline: 2px solid var(--st-shell-accent);
+    outline-offset: 3px;
+}
+
+.welcomeRecent .recentChatList .recentChat:hover {
+    border-color: rgba(198, 75, 82, 0.48);
+    background: var(--st-shell-accent-soft);
+}
+
+.welcomeRecent .recentChatList .recentChat .chatNameContainer {
+    align-items: center;
+}
+
+.welcomeRecent .recentChatList .recentChat .chatActions button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+}
+
+.welcomeRecent .recentChatList .noRecentChat {
+    grid-column: 1 / -1;
+    min-height: 8rem;
+    border: 1px dashed var(--st-shell-line);
+    border-radius: 0.8rem;
+}
+
+.welcomeRecent .recentChatList .showMoreChats {
+    grid-column: 1 / -1;
+    min-height: 2.75rem;
+    justify-self: center;
+}
+
+/* Character and group library */
+:where(body:not(.movingUI)) #right-nav-panelheader {
+    display: none;
+}
+
+:where(body:not(.movingUI)) #CharListButtonAndHotSwaps {
+    flex: 0 0 auto;
+    min-height: 4rem;
+    padding: 0.5rem clamp(0.75rem, 2vw, 1.5rem);
+    border-bottom: 1px solid var(--st-shell-line);
+    background: var(--st-shell-surface);
+}
+
+:where(body:not(.movingUI)) #CharListButtonAndHotSwaps > .flexFlowColumn {
+    flex-direction: row;
+    align-items: center;
+}
+
+:where(body:not(.movingUI)) #rm_button_panel_pin_div label,
+:where(body:not(.movingUI)) #rm_button_characters {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+}
+
+:where(body:not(.movingUI)) #rm_button_panel_pin_div label {
+    display: grid;
+    place-items: center;
+}
+
+:where(body:not(.movingUI)) #rm_button_panel_pin_div .right_menu_button {
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: 0;
+    line-height: 2.75rem;
+}
+
+:where(body:not(.movingUI)) #rm_button_characters {
+    width: 2.75rem;
+    height: 2.75rem;
+    display: grid;
+    place-items: center;
+    margin: 0;
+}
+
+:where(body:not(.movingUI)) #rm_PinAndTabs {
+    flex: 0 0 auto;
+    padding: 0 clamp(0.75rem, 2vw, 1.5rem);
+    background: var(--st-shell-surface);
+}
+
+:where(body:not(.movingUI)) #right-nav-panel > .scrollableInner {
+    min-height: 0;
+    overflow: hidden;
+}
+
+:where(body:not(.movingUI)) #rm_characters_block {
+    min-height: 0;
+    background: var(--st-shell-ground);
+}
+
+:where(body:not(.movingUI)) #charListFixedTop {
+    flex: 0 0 auto;
+    padding: 0.85rem clamp(0.75rem, 2.5vw, 2rem);
+    border-bottom: 1px solid var(--st-shell-line);
+    background: var(--st-shell-ground);
+}
+
+:where(body:not(.movingUI)) #rm_button_bar {
+    gap: 0.45rem;
+}
+
+:where(body:not(.movingUI)) #rm_button_bar .menu_button,
+:where(body:not(.movingUI)) #rm_button_search {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 0.55rem;
+    border-radius: 0.6rem;
+}
+
+:where(body:not(.movingUI)) #rm_button_create {
+    color: #fff;
+    background: var(--st-shell-accent);
+    border-color: var(--st-shell-accent);
+}
+
+:where(body:not(.movingUI)) :is(#character_sort_order, #character_search_bar) {
+    min-height: 2.75rem;
+    margin: 0;
+    border-radius: 0.6rem;
+}
+
+:where(body:not(.movingUI)) #form_character_search_form {
+    gap: 0.45rem;
+}
+
+:where(body:not(.movingUI)) .rm_tag_controls .tag.actionable {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:where(body:not(.movingUI)) #rm_print_characters_block {
+    min-height: 0;
+    height: auto;
+    gap: 0.6rem;
+    padding: clamp(0.75rem, 2.5vw, 2rem);
+    align-content: flex-start;
+}
+
+:where(body:not(.movingUI)) #rm_print_characters_block > .entity_block {
+    min-width: 0;
+    margin: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--st-shell-line);
+    border-radius: 0.8rem;
+    background: rgba(255, 255, 255, 0.025);
+    transition: border-color var(--animation-duration-2x) ease, background-color var(--animation-duration-2x) ease;
+}
+
+:where(body:not(.movingUI)) #rm_print_characters_block > .entity_block:hover {
+    border-color: rgba(198, 75, 82, 0.48);
+    background: var(--st-shell-accent-soft);
+}
+
+:where(body:not(.movingUI)) #rm_print_characters_block .ch_description {
+    margin-top: 0.2rem;
+    color: var(--st-shell-muted);
+    line-height: 1.4;
+}
+
+:where(body:not(.movingUI)) #rm_print_characters_block .tag[role="button"] {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+:where(body:not(.movingUI)).charListGrid #rm_print_characters_block {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+    justify-content: stretch;
+}
+
+:where(body:not(.movingUI)).charListGrid #rm_print_characters_block :is(
+    .bogus_folder_select,
+    .character_select,
+    .group_select
+) {
+    width: auto;
+    max-width: none;
+    height: auto;
+    align-items: center;
+}
+
+:where(body:not(.movingUI)).charListGrid #rm_print_characters_block :is(
+    .character_select_container,
+    .group_select_container,
+    .character_name_block,
+    .group_name_block
+) {
+    width: 100%;
+    max-width: none;
+}
+
+:where(body:not(.movingUI)).charListGrid #rm_print_characters_block :is(.ch_name, .group_select_counter) {
+    max-width: none;
+}
+
+:where(body:not(.movingUI)) #rm_print_characters_pagination {
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.6rem 1rem;
+    border-top: 1px solid var(--st-shell-line);
+}
+
+:where(body:not(.movingUI)) #rm_print_characters_pagination .paginationjs {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+:where(body:not(.movingUI)) #rm_print_characters_pagination .paginationjs-pages li > a,
+:where(body:not(.movingUI)) :is(#charListGridToggle, #bulkEditButton, #bulkSelectAllButton, #bulkDeleteButton) {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    display: inline-grid;
+    place-items: center;
+}
+
+/* Scoped, quiet scrollbars for shell-owned scrolling regions. */
+:where(
+    .st-shell-rail-nav,
+    #st-shell-more,
+    #chat,
+    #rm_print_characters_block,
+    #right-nav-panel .scrollableInner,
+    #left-nav-panel .scrollableInner,
+    #rm_api_block,
+    #AdvancedFormatting,
+    #WorldInfo,
+    #user-settings-block,
+    #Backgrounds,
+    #rm_extensions_block,
+    #PersonaManagement
+) {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(160, 160, 165, 0.46) transparent;
+}
+
+:where(
+    .st-shell-rail-nav,
+    #st-shell-more,
+    #chat,
+    #rm_print_characters_block,
+    #right-nav-panel .scrollableInner,
+    #left-nav-panel .scrollableInner,
+    #rm_api_block,
+    #AdvancedFormatting,
+    #WorldInfo,
+    #user-settings-block,
+    #Backgrounds,
+    #rm_extensions_block,
+    #PersonaManagement
+)::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+:where(
+    .st-shell-rail-nav,
+    #st-shell-more,
+    #chat,
+    #rm_print_characters_block,
+    #right-nav-panel .scrollableInner,
+    #left-nav-panel .scrollableInner,
+    #rm_api_block,
+    #AdvancedFormatting,
+    #WorldInfo,
+    #user-settings-block,
+    #Backgrounds,
+    #rm_extensions_block,
+    #PersonaManagement
+)::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+:where(
+    .st-shell-rail-nav,
+    #st-shell-more,
+    #chat,
+    #rm_print_characters_block,
+    #right-nav-panel .scrollableInner,
+    #left-nav-panel .scrollableInner,
+    #rm_api_block,
+    #AdvancedFormatting,
+    #WorldInfo,
+    #user-settings-block,
+    #Backgrounds,
+    #rm_extensions_block,
+    #PersonaManagement
+)::-webkit-scrollbar-thumb {
+    min-height: 2rem;
+    background: rgba(160, 160, 165, 0.46);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .welcomeRecent .recentChatList .recentChat .chatActions {
+        opacity: 0;
+        transition: opacity var(--animation-duration-2x) ease;
+    }
+
+    .welcomeRecent .recentChatList .recentChat:is(:hover, :focus-within) .chatActions {
+        opacity: 1;
+    }
+}
+
+@media screen and (min-width: 721px) and (max-width: 1280px) {
+    :where(body:not(.movingUI)) {
+        --st-shell-character-context-width: min(20rem, max(12rem, calc(100dvw - var(--st-shell-rail-width) - 18rem)));
+    }
+
+    :where(body:not(.movingUI)):has(#right-nav-panel.st-shell-character-context.openDrawer) #sheld {
+        right: var(--st-shell-character-context-width);
+        width: calc(100dvw - var(--st-shell-rail-width) - var(--st-shell-character-context-width));
+    }
+
+    :where(body:not(.movingUI)) #right-nav-panel.st-shell-character-context.openDrawer {
+        z-index: 3070;
+        top: var(--st-shell-workspace-top);
+        right: 0;
+        bottom: 0;
+        left: auto;
+        width: var(--st-shell-character-context-width);
+        height: calc(100dvh - var(--st-shell-workspace-top));
+        max-width: var(--st-shell-character-context-width);
+        border-left: 1px solid var(--st-shell-line);
+    }
+}
+
+@media screen and (min-width: 1281px) {
+    :where(body:not(.movingUI)) {
+        --st-shell-pinned-panel-width: clamp(16rem, 20vw, 22rem);
+        --st-shell-pinned-left-space: 0px;
+        --st-shell-pinned-right-space: 0px;
+    }
+
+    :where(body:not(.movingUI)):has(#right-nav-panel.st-shell-character-context.openDrawer) {
+        --st-shell-pinned-panel-width: clamp(20rem, 24vw, 24rem);
+    }
+
+    :where(body:not(.movingUI)):has(#left-nav-panel.pinnedOpen.openDrawer):has(#right-nav-panel:is(.pinnedOpen, .st-shell-character-context).openDrawer),
+    :where(body:not(.movingUI)):has(#left-nav-panel.pinnedOpen.openDrawer):has(#WorldInfo.pinnedOpen.openDrawer),
+    :where(body:not(.movingUI)):has(#right-nav-panel:is(.pinnedOpen, .st-shell-character-context).openDrawer):has(#WorldInfo.pinnedOpen.openDrawer) {
+        --st-shell-pinned-panel-width: clamp(13rem, 16vw, 18rem);
+    }
+
+    :where(body:not(.movingUI)):has(#left-nav-panel.pinnedOpen.openDrawer) {
+        --st-shell-pinned-left-space: var(--st-shell-pinned-panel-width);
+    }
+
+    :where(body:not(.movingUI)):has(#right-nav-panel:is(.pinnedOpen, .st-shell-character-context).openDrawer),
+    :where(body:not(.movingUI)):has(#WorldInfo.pinnedOpen.openDrawer) {
+        --st-shell-pinned-right-space: var(--st-shell-pinned-panel-width);
+    }
+
+    :where(body:not(.movingUI)):has(#right-nav-panel:is(.pinnedOpen, .st-shell-character-context).openDrawer):has(#WorldInfo.pinnedOpen.openDrawer) {
+        --st-shell-pinned-right-space: calc(2 * var(--st-shell-pinned-panel-width));
+    }
+
+    :where(body:not(.movingUI)) #sheld,
+    :where(body:not(.movingUI)) :is(
+        #left-nav-panel,
+        #rm_api_block,
+        #AdvancedFormatting,
+        #WorldInfo,
+        #user-settings-block,
+        #Backgrounds,
+        #rm_extensions_block,
+        #PersonaManagement,
+        #right-nav-panel
+    ):not(.pinnedOpen):not(.st-shell-character-context),
+    :where(body:not(.movingUI)) .st-shell-extension-panel {
+        right: var(--st-shell-pinned-right-space);
+        left: calc(var(--st-shell-rail-width) + var(--st-shell-pinned-left-space));
+        width: calc(100dvw - var(--st-shell-rail-width) - var(--st-shell-pinned-left-space) - var(--st-shell-pinned-right-space));
+    }
+
+    :where(body:not(.movingUI)) :is(
+        #left-nav-panel.pinnedOpen.openDrawer,
+        #WorldInfo.pinnedOpen.openDrawer,
+        #right-nav-panel:is(.pinnedOpen, .st-shell-character-context).openDrawer
+    ) {
+        z-index: 3070;
+        top: var(--st-shell-workspace-top);
+        bottom: 0;
+        width: var(--st-shell-pinned-panel-width);
+        height: calc(100dvh - var(--st-shell-workspace-top));
+        min-width: 0;
+        max-width: var(--st-shell-pinned-panel-width);
+        max-height: none;
+        margin: 0;
+        border-radius: 0;
+        border-left: 1px solid var(--st-shell-line);
+        border-right: 1px solid var(--st-shell-line);
+        background: var(--st-shell-ground);
+    }
+
+    :where(body:not(.movingUI)) #left-nav-panel.pinnedOpen.openDrawer {
+        right: auto;
+        left: var(--st-shell-rail-width);
+    }
+
+    :where(body:not(.movingUI)) :is(#WorldInfo.pinnedOpen.openDrawer, #right-nav-panel:is(.pinnedOpen, .st-shell-character-context).openDrawer) {
+        right: 0;
+        left: auto;
+    }
+
+    :where(body:not(.movingUI)):has(#right-nav-panel:is(.pinnedOpen, .st-shell-character-context).openDrawer) #WorldInfo.pinnedOpen.openDrawer {
+        right: var(--st-shell-pinned-panel-width);
+    }
+}
+
+@media screen and (max-width: 720px) {
+    #st-shell-rail {
+        display: none;
+    }
+
+    #st-workspace-header {
+        left: 0;
+        height: var(--st-shell-mobile-header-height);
+        padding: 0.45rem max(0.75rem, env(safe-area-inset-right, 0px)) 0.45rem max(0.75rem, env(safe-area-inset-left, 0px));
+    }
+
+    :where(body.st-shell-has-legacy-top-bar:not(.movingUI)) #top-bar {
+        top: var(--st-shell-mobile-header-height);
+        left: 0;
+        padding-inline: max(0.75rem, env(safe-area-inset-left, 0px));
+    }
+
+    .st-workspace-eyebrow {
+        display: none;
+    }
+
+    #st-workspace-title {
+        font-size: 1rem;
+    }
+
+    .st-workspace-controls {
+        gap: 0.35rem;
+    }
+
+    .st-shell-character-details:not([hidden]) {
+        width: 2.75rem;
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
+        border: 1px solid var(--st-shell-line);
+        border-radius: 0.65rem;
+        background: rgba(0, 0, 0, 0.08);
+    }
+
+    .st-shell-connection-chip {
+        width: 2.75rem;
+        min-width: 2.75rem;
+        grid-template-columns: 1fr;
+        padding: 0;
+    }
+
+    .st-shell-connection-chip span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .st-shell-language-label {
+        min-height: 2.75rem;
+        padding: 0.2rem 0.3rem 0.2rem 0.55rem;
+    }
+
+    #st-shell-language {
+        min-width: 4.25rem;
+        max-width: 6.5rem;
+    }
+
+    #st-shell-mobile-nav {
+        position: fixed;
+        z-index: 3100;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: var(--st-shell-mobile-nav-height);
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        align-items: start;
+        padding: 0 max(0.25rem, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(0.25rem, env(safe-area-inset-left, 0px));
+        color: var(--SmartThemeBodyColor);
+        background: var(--st-shell-surface);
+        border-top: 1px solid var(--st-shell-line);
+        backdrop-filter: blur(calc(var(--SmartThemeBlurStrength) * 1.4));
+        -webkit-backdrop-filter: blur(calc(var(--SmartThemeBlurStrength) * 1.4));
+    }
+
+    #st-shell-mobile-nav button {
+        appearance: none;
+        min-width: 2.75rem;
+        min-height: 4rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+        padding: 0.3rem 0.1rem;
+        color: var(--st-shell-muted);
+        background: transparent;
+        border: 0;
+        border-top: 3px solid transparent;
+        font-size: 0.68rem;
+        cursor: pointer;
+    }
+
+    #st-shell-mobile-nav button i {
+        font-size: 1rem;
+    }
+
+    #st-shell-mobile-nav button.is-active {
+        color: var(--SmartThemeBodyColor);
+        border-top-color: var(--st-shell-accent);
+        background: var(--st-shell-accent-soft);
+        box-shadow: none;
+    }
+
+    #st-shell-more[open] {
+        position: fixed;
+        inset: auto 0 var(--st-shell-mobile-nav-height) 0;
+        width: 100%;
+        max-width: none;
+        max-height: min(70dvh, 34rem);
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        padding: 0;
+        overflow-y: auto;
+        border-width: 1px 0 0;
+        border-radius: 1rem 1rem 0 0;
+    }
+
+    :where(body:not(.movingUI)) #top-settings-holder {
+        top: 0;
+        right: 0;
+        width: 0;
+        height: 0;
+    }
+
+    :where(body:not(.movingUI)) #top-settings-holder > .drawer:not(:is(
+        #ai-config-button,
+        #sys-settings-button,
+        #advanced-formatting-button,
+        #WI-SP-button,
+        #user-settings-button,
+        #backgrounds-button,
+        #extensions-settings-button,
+        #persona-management-button,
+        #rightNavHolder
+    )) > .drawer-toggle {
+        display: none;
+    }
+
+    :where(body:not(.movingUI)) #sheld {
+        inset: var(--st-shell-mobile-workspace-top) 0 var(--st-shell-mobile-nav-height) 0;
+        width: 100dvw;
+        height: calc(100dvh - var(--st-shell-mobile-workspace-top) - var(--st-shell-mobile-nav-height));
+    }
+
+    :where(body:not(.movingUI)) :is(
+        #left-nav-panel,
+        #rm_api_block,
+        #AdvancedFormatting,
+        #WorldInfo,
+        #user-settings-block,
+        #Backgrounds,
+        #rm_extensions_block,
+        #PersonaManagement,
+        #right-nav-panel,
+        .st-shell-extension-panel
+    ) {
+        top: var(--st-shell-mobile-workspace-top);
+        right: 0;
+        bottom: var(--st-shell-mobile-nav-height);
+        left: 0;
+        width: 100dvw;
+        height: calc(100dvh - var(--st-shell-mobile-workspace-top) - var(--st-shell-mobile-nav-height));
+        min-width: 0;
+        border-radius: 0;
+    }
+
+    :where(body:not(.movingUI)) #right-nav-panel.st-shell-character-context.openDrawer {
+        left: auto;
+        width: min(22rem, 92dvw);
+        border-left: 1px solid var(--st-shell-line);
+        box-shadow: -100dvw 0 0 100dvw rgba(0, 0, 0, 0.48);
+    }
+
+    :where(body:not(.movingUI)) #right-nav-panel.st-shell-character-context.openDrawer .st-shell-character-context-close {
+        position: absolute;
+        z-index: 2;
+        top: 0.65rem;
+        right: 0.65rem;
+        width: 2.75rem;
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        border-radius: 50%;
+    }
+
+    :where(body:not(.movingUI)) #chat {
+        padding: 0.8rem 0.45rem;
+        scrollbar-gutter: auto;
+    }
+
+    :where(body:not(.movingUI)) #chat:not(:has(> .welcomePanel))::before {
+        left: 2rem;
+    }
+
+    :where(body:not(.movingUI)) #chat > .mes {
+        padding: 0.65rem 0.35rem;
+    }
+
+    :where(body:not(.movingUI)) #form_sheld {
+        padding: 0.45rem max(0.45rem, env(safe-area-inset-right, 0px)) 0.45rem max(0.45rem, env(safe-area-inset-left, 0px));
+    }
+
+    :where(body:not(.movingUI)) #send_form {
+        min-height: 3rem;
+        border-radius: 0.75rem;
+    }
+
+    :where(body:not(.movingUI)) #send_textarea {
+        min-height: 2.75rem;
+        padding-block: 0.65rem;
+    }
+
+    :where(body:not(.movingUI)) .welcomePanel {
+        padding: 0.75rem;
+    }
+
+    .welcomePanel .welcomeHero {
+        min-height: 0;
+        grid-template-columns: 1fr;
+        padding: 1.25rem;
+        border-radius: 1rem;
+    }
+
+    .welcomeHeroMark {
+        display: none;
+    }
+
+    .welcomePanel .welcomeHero h2 {
+        max-width: 12ch;
+        font-size: clamp(2rem, 11vw, 3.25rem);
+    }
+
+    .welcomePrimaryActions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .welcomePanel .welcomePrimaryActions .menu_button {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .welcomePanel .welcomeHeaderTitle {
+        margin-top: 0.75rem;
+    }
+
+    .welcomePanel .welcomeHeader {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.45rem;
+        min-height: 5.4rem;
+        margin-top: 0.75rem;
+        padding: 0 8.5rem 0.55rem 0;
+    }
+
+    .welcomePanel .welcomeShortcuts {
+        justify-content: flex-start;
+    }
+
+    .welcomePanel .welcomeShortcuts a span {
+        display: inline;
+    }
+
+    .welcomeRecent .recentChatList {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .welcomeRecent .recentChatList .recentChat {
+        min-height: 5.5rem;
+        padding: 0.65rem;
+    }
+
+    .welcomeRecent .recentChatList .recentChat .chatDate,
+    .welcomeRecent .recentChatList .recentChat .fileSize {
+        display: none;
+    }
+
+    :where(body:not(.movingUI)) #CharListButtonAndHotSwaps {
+        min-height: 3.5rem;
+        padding-inline: 0.65rem;
+    }
+
+    :where(body:not(.movingUI)) #charListFixedTop {
+        padding: 0.65rem;
+    }
+
+    :where(body:not(.movingUI)) #rm_print_characters_block {
+        padding: 0.65rem;
+    }
+
+    :where(body:not(.movingUI)).charListGrid #rm_print_characters_block {
+        grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :is(#st-shell-rail, #st-workspace-header, #st-shell-mobile-nav, #st-shell-more, .welcomePanel) *,
+    .st-shell-skip-link {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

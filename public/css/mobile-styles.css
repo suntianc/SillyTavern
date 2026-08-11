@@ -303,9 +303,21 @@
     }
 
 
-    #sheld,
     #character_popup,
-    .drawer-content {
+    body.movingUI #sheld,
+    body.movingUI .drawer-content,
+    body:not(.movingUI) .drawer-content:not(:is(
+        #left-nav-panel,
+        #rm_api_block,
+        #AdvancedFormatting,
+        #WorldInfo,
+        #user-settings-block,
+        #Backgrounds,
+        #rm_extensions_block,
+        #PersonaManagement,
+        #right-nav-panel,
+        .st-shell-extension-panel
+    )) {
         width: 100dvw !important;
         margin: 0 auto;
         max-width: 100dvw;
@@ -369,8 +381,8 @@
         display: none;
     }
 
-    #right-nav-panel,
-    #left-nav-panel,
+    body.movingUI #right-nav-panel,
+    body.movingUI #left-nav-panel,
     #floatingPrompt,
     #cfgConfig,
     #logprobsViewer,
@@ -395,8 +407,8 @@
         }
     }
 
-    #left-nav-panel:not(.openDrawer),
-    #right-nav-panel:not(.openDrawer) {
+    body.movingUI #left-nav-panel:not(.openDrawer),
+    body.movingUI #right-nav-panel:not(.openDrawer) {
         height: 0;
     }
 

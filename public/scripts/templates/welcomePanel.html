@@ -1,52 +1,77 @@
 <div class="welcomePanel">
-    <div class="welcomeHeaderTitle">
-        <img src="img/logo.png" alt="SillyTavern Logo" data-i18n="[alt]SillyTavern Logo" class="welcomeHeaderLogo">
-        <span class="welcomeHeaderVersionDisplay">{{version}}</span>
-        <div class="mes_button showRecentChats" title="Show recent chats" data-i18n="[title]Show recent chats">
-            <i class="fa-solid fa-circle-chevron-down fa-fw fa-lg"></i>
+    <section class="welcomeHero" aria-labelledby="welcomeHeroTitle">
+        <div class="welcomeHeroCopy">
+            <div class="welcomeKicker">
+                <img src="img/logo.png" alt="" aria-hidden="true" class="welcomeHeaderLogo">
+                <span class="welcomeHeaderVersionDisplay">{{version}}</span>
+            </div>
+            <h2 id="welcomeHeroTitle" data-i18n="Welcome to SillyTavern!">Welcome to SillyTavern!</h2>
+            <p data-i18n="Select/Create Characters">Select/Create Characters</p>
+            <div class="welcomePrimaryActions">
+                <button type="button" class="menu_button menu_button_icon" data-shell-route="characters">
+                    <i class="fa-solid fa-address-card" aria-hidden="true"></i>
+                    <span data-i18n="Characters">Characters</span>
+                </button>
+                <button type="button" class="menu_button menu_button_icon" data-shell-route="api">
+                    <i class="fa-solid fa-plug" aria-hidden="true"></i>
+                    <span data-i18n="API Connections">API Connections</span>
+                </button>
+                <button type="button" class="openTemporaryChat menu_button menu_button_icon">
+                    <i class="fa-solid fa-comment-dots" aria-hidden="true"></i>
+                    <span data-i18n="Temporary Chat">Temporary Chat</span>
+                </button>
+            </div>
         </div>
-        <div class="mes_button recentChatsSettings" title="Recent chats settings" data-i18n="[title]Recent chats settings">
-            <i class="fa-solid fa-gear fa-fw fa-lg"></i>
+        <div class="welcomeHeroMark" aria-hidden="true">
+            <i class="fa-solid fa-feather-pointed"></i>
         </div>
-        <div class="mes_button hideRecentChats" title="Hide recent chats" data-i18n="[title]Hide recent chats">
-            <i class="fa-solid fa-circle-xmark fa-fw fa-lg"></i>
-        </div>
+    </section>
+
+    <div class="welcomeHeaderTitle" role="toolbar" aria-label="Recent Chats" data-i18n="[aria-label]Recent Chats">
+        <button type="button" class="mes_button showRecentChats" title="Show recent chats" data-i18n="[title]Show recent chats">
+            <i class="fa-solid fa-circle-chevron-down fa-fw fa-lg" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="mes_button recentChatsSettings" title="Recent chats settings" data-i18n="[title]Recent chats settings">
+            <i class="fa-solid fa-gear fa-fw fa-lg" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="mes_button hideRecentChats" title="Hide recent chats" data-i18n="[title]Hide recent chats">
+            <i class="fa-solid fa-circle-xmark fa-fw fa-lg" aria-hidden="true"></i>
+        </button>
     </div>
+
     <div class="welcomeHeader">
-        <div class="recentChatsTitle" data-i18n="Recent Chats">
-            Recent Chats
-        </div>
+        <div class="recentChatsTitle" data-i18n="Recent Chats">Recent Chats</div>
         <div class="welcomeShortcuts">
-            <a class="menu_button menu_button_icon" target="_blank" href="https://docs.sillytavern.app/">
-                <i class="fa-solid fa-question-circle"></i>
+            <a class="menu_button menu_button_icon" target="_blank" href="https://docs.sillytavern.app/" aria-label="Docs" data-i18n="[aria-label]Docs">
+                <i class="fa-solid fa-question-circle" aria-hidden="true"></i>
                 <span data-i18n="Docs">Docs</span>
             </a>
-            <a class="menu_button menu_button_icon" target="_blank" href="https://github.com/SillyTavern/SillyTavern">
-                <i class="fa-brands fa-github"></i>
+            <a class="menu_button menu_button_icon" target="_blank" href="https://github.com/SillyTavern/SillyTavern" aria-label="GitHub" data-i18n="[aria-label]GitHub">
+                <i class="fa-brands fa-github" aria-hidden="true"></i>
                 <span data-i18n="GitHub">GitHub</span>
             </a>
-            <a class="menu_button menu_button_icon" target="_blank" href="https://discord.gg/sillytavern">
-                <i class="fa-brands fa-discord"></i>
+            <a class="menu_button menu_button_icon" target="_blank" href="https://discord.gg/sillytavern" aria-label="Discord" data-i18n="[aria-label]Discord">
+                <i class="fa-brands fa-discord" aria-hidden="true"></i>
                 <span data-i18n="Discord">Discord</span>
             </a>
-            <span class="welcomeShortcutsSeparator">&vert;</span>
-            <button class="openTemporaryChat menu_button menu_button_icon">
-                <i class="fa-solid fa-comment-dots"></i>
-                <span data-i18n="Temporary Chat">Temporary Chat</span>
-            </button>
         </div>
     </div>
+
     <div class="welcomeRecent">
         <div class="recentChatList">
         {{#if empty}}
             <div class="noRecentChat">
-                <i class="fa-solid fa-comment-dots"></i>
+                <i class="fa-solid fa-comment-dots" aria-hidden="true"></i>
                 <span data-i18n="No recent chats">No recent chats</span>
             </div>
         {{/if}}
         {{#each chats}}
             {{#with this}}
             <div class="recentChat {{#if hidden}}hidden{{/if}} {{#if is_group}}group{{/if}}" data-file="{{chat_name}}" data-avatar="{{avatar}}" data-group="{{group}}">
+                <button type="button" class="recentChatOpen">
+                    <span class="st-shell-visually-hidden" data-i18n="Open chat">Open chat</span>
+                    <span class="st-shell-visually-hidden">: {{char_name}} — {{chat_name}}</span>
+                </button>
                 {{#if pinned}}
                     <div class="recentChatPinned">
                         <i class="fa-solid fa-thumbtack fa-fw fa-xs" title="Pinned chat" data-i18n="[title]Pinned chat"></i>
@@ -64,24 +89,22 @@
                         </div>
                         <small class="chatDate" title="{{date_long}}">{{date_short}}</small>
                         <div class="chatActions">
-                            <button class="menu_button menu_button_icon pinChat {{#if pinned}}active{{/if}}" title="Pin chat" data-i18n="[title]Pin chat">
-                                <i class="fa-solid fa-thumbtack fa-fw"></i>
+                            <button type="button" class="menu_button menu_button_icon pinChat {{#if pinned}}active{{/if}}" title="Pin chat" data-i18n="[title]Pin chat">
+                                <i class="fa-solid fa-thumbtack fa-fw" aria-hidden="true"></i>
                             </button>
-                            <button class="menu_button menu_button_icon renameChat" title="Rename chat" data-i18n="[title]Rename chat">
-                                <i class="fa-solid fa-pen-to-square fa-fw"></i>
+                            <button type="button" class="menu_button menu_button_icon renameChat" title="Rename chat" data-i18n="[title]Rename chat">
+                                <i class="fa-solid fa-pen-to-square fa-fw" aria-hidden="true"></i>
                             </button>
-                            <button class="menu_button menu_button_icon deleteChat" title="Delete chat" data-i18n="[title]Delete chat">
-                                <i class="fa-solid fa-trash fa-fw"></i>
+                            <button type="button" class="menu_button menu_button_icon deleteChat" title="Delete chat" data-i18n="[title]Delete chat">
+                                <i class="fa-solid fa-trash fa-fw" aria-hidden="true"></i>
                             </button>
                         </div>
                     </div>
                     <div class="chatMessageContainer">
-                        <div class="chatMessage" title="{{mes}}">
-                            {{mes}}
-                        </div>
+                        <div class="chatMessage" title="{{mes}}">{{mes}}</div>
                         <div class="chatStats">
                             <div class="counterBlock">
-                                <i class="fa-solid fa-comment fa-xs"></i>
+                                <i class="fa-solid fa-comment fa-xs" aria-hidden="true"></i>
                                 <small>{{chat_items}}</small>
                             </div>
                             <small class="fileSize">{{file_size}}</small>
@@ -92,8 +115,8 @@
             {{/with}}
         {{/each}}
         {{#if more}}
-            <button class="menu_button menu_button_icon showMoreChats">
-                <small class="fa-solid fa-chevron-down fa-fw fa-1x"></small>
+            <button type="button" class="menu_button menu_button_icon showMoreChats">
+                <small class="fa-solid fa-chevron-down fa-fw fa-1x" aria-hidden="true"></small>
             </button>
         {{/if}}
         </div>

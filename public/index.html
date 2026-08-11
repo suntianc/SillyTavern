@@ -43,6 +43,7 @@
     <link rel="stylesheet" type="text/css" href="css/select2-overrides.css">
     <link rel="stylesheet" type="text/css" href="css/mobile-styles.css">
     <link rel="stylesheet" type="text/css" href="css/macros.css">
+    <link rel="stylesheet" type="text/css" href="css/authenticated-shell.css">
     <link rel="stylesheet" type="text/css" href="css/user.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <!-- Scripts are loaded at the end of the body to improve page load speed -->
@@ -51,6 +52,165 @@
 <body class="no-blur">
     <div id="preloader"></div>
     <div id="bg1"></div>
+
+    <a class="st-shell-skip-link" href="#chat" data-i18n="Skip to chat">Skip to chat</a>
+
+    <aside id="st-shell-rail" aria-label="Main menu" data-i18n="[aria-label]Main menu">
+        <div class="st-shell-brand" aria-label="SillyTavern">
+            <img src="img/logo.png" alt="" aria-hidden="true">
+            <span>SillyTavern</span>
+        </div>
+        <nav class="st-shell-rail-nav" aria-label="Workspace navigation" data-i18n="[aria-label]Workspace navigation">
+            <div class="st-shell-nav-group">
+                <div class="st-shell-nav-label" data-i18n="Chat">Chat</div>
+                <button type="button" class="st-shell-nav-item" data-shell-route="home">
+                    <i class="fa-solid fa-house" aria-hidden="true"></i>
+                    <span data-i18n="Recent Chats">Recent Chats</span>
+                </button>
+                <button type="button" class="st-shell-nav-item" data-shell-route="chat">
+                    <i class="fa-solid fa-comments" aria-hidden="true"></i>
+                    <span data-i18n="Chat">Chat</span>
+                </button>
+            </div>
+            <div class="st-shell-nav-group">
+                <div class="st-shell-nav-label" data-i18n="Create">Create</div>
+                <button type="button" class="st-shell-nav-item" data-shell-route="characters">
+                    <i class="fa-solid fa-address-card" aria-hidden="true"></i>
+                    <span data-i18n="Characters">Characters</span>
+                </button>
+                <button type="button" class="st-shell-nav-item" data-shell-route="world-info">
+                    <i class="fa-solid fa-book-atlas" aria-hidden="true"></i>
+                    <span data-i18n="World Info">World Info</span>
+                </button>
+                <button type="button" class="st-shell-nav-item" data-shell-route="persona">
+                    <i class="fa-solid fa-face-smile" aria-hidden="true"></i>
+                    <span data-i18n="Persona Management">Persona Management</span>
+                </button>
+            </div>
+            <div class="st-shell-nav-group">
+                <div class="st-shell-nav-label" data-i18n="User Settings">Settings</div>
+                <button type="button" class="st-shell-nav-item" data-shell-route="ai-config">
+                    <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+                    <span data-i18n="AI Response Configuration">AI Response Configuration</span>
+                </button>
+                <button type="button" class="st-shell-nav-item" data-shell-route="formatting">
+                    <i class="fa-solid fa-font" aria-hidden="true"></i>
+                    <span data-i18n="AI Response Formatting">AI Response Formatting</span>
+                </button>
+                <button type="button" class="st-shell-nav-item" data-shell-route="backgrounds">
+                    <i class="fa-solid fa-image" aria-hidden="true"></i>
+                    <span data-i18n="Backgrounds">Backgrounds</span>
+                </button>
+                <button type="button" class="st-shell-nav-item" data-shell-route="user-settings">
+                    <i class="fa-solid fa-gears" aria-hidden="true"></i>
+                    <span data-i18n="User Settings">User Settings</span>
+                </button>
+                <button type="button" class="st-shell-nav-item" data-shell-route="extensions">
+                    <i class="fa-solid fa-cubes" aria-hidden="true"></i>
+                    <span data-i18n="Extensions">Extensions</span>
+                </button>
+            </div>
+            <div class="st-shell-nav-group st-shell-extension-group">
+                <div class="st-shell-nav-label" data-i18n="Extensions">Extensions</div>
+                <div id="st-shell-desktop-extension-routes"></div>
+            </div>
+        </nav>
+        <button type="button" class="st-shell-connection" data-shell-route="api">
+            <i class="fa-solid fa-plug" aria-hidden="true"></i>
+            <span class="st-shell-connected" data-i18n="Connected">Connected</span>
+            <span class="st-shell-disconnected" data-i18n="Not connected to API!">Not connected to API!</span>
+        </button>
+    </aside>
+
+    <header id="st-workspace-header">
+        <div class="st-workspace-heading">
+            <span class="st-workspace-eyebrow">SillyTavern</span>
+            <h1 id="st-workspace-title" data-i18n="Recent Chats">Recent Chats</h1>
+        </div>
+        <div class="st-workspace-controls">
+            <button id="st-shell-character-details" type="button" class="menu_button st-shell-character-details" aria-label="Character details" aria-controls="right-nav-panel" aria-expanded="false" title="Character details" data-i18n="[aria-label]Character details;[title]Character details" hidden>
+                <i class="fa-solid fa-address-card" aria-hidden="true"></i>
+                <span class="st-shell-visually-hidden" data-i18n="Character details">Character details</span>
+            </button>
+            <button type="button" class="st-shell-connection st-shell-connection-chip" data-shell-route="api">
+                <i class="fa-solid fa-plug" aria-hidden="true"></i>
+                <span class="st-shell-connected" data-i18n="Connected">Connected</span>
+                <span class="st-shell-disconnected" data-i18n="Not connected to API!">Not connected to API!</span>
+            </button>
+            <label class="st-shell-language-label" for="st-shell-language">
+                <span class="st-shell-visually-hidden" data-i18n="UI Language">UI Language</span>
+                <i class="fa-solid fa-language" aria-hidden="true"></i>
+                <select id="st-shell-language" aria-label="UI Language" data-i18n="[aria-label]UI Language">
+                    <option value="en">English</option>
+                </select>
+            </label>
+        </div>
+    </header>
+
+    <nav id="st-shell-mobile-nav" aria-label="Main menu" data-i18n="[aria-label]Main menu">
+        <button type="button" data-shell-route="home">
+            <i class="fa-solid fa-house" aria-hidden="true"></i>
+            <span data-i18n="Recent">Recent</span>
+        </button>
+        <button type="button" data-shell-route="chat">
+            <i class="fa-solid fa-comments" aria-hidden="true"></i>
+            <span data-i18n="Chat">Chat</span>
+        </button>
+        <button type="button" data-shell-route="characters">
+            <i class="fa-solid fa-address-card" aria-hidden="true"></i>
+            <span data-i18n="Characters">Characters</span>
+        </button>
+        <button type="button" data-shell-action="more">
+            <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+            <span data-i18n="More...">More...</span>
+        </button>
+    </nav>
+
+    <dialog id="st-shell-more" aria-labelledby="st-shell-more-title">
+        <div class="st-shell-more-header">
+            <h2 id="st-shell-more-title" data-i18n="More...">More...</h2>
+            <button id="st-shell-more-close" type="button" class="menu_button" title="Close" data-i18n="[title]Close">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                <span class="st-shell-visually-hidden" data-i18n="Close">Close</span>
+            </button>
+        </div>
+        <div class="st-shell-more-content">
+            <button type="button" class="st-shell-nav-item" data-shell-route="ai-config">
+                <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+                <span data-i18n="AI Response Configuration">AI Response Configuration</span>
+            </button>
+            <button type="button" class="st-shell-nav-item" data-shell-route="api">
+                <i class="fa-solid fa-plug" aria-hidden="true"></i>
+                <span data-i18n="API Connections">API Connections</span>
+            </button>
+            <button type="button" class="st-shell-nav-item" data-shell-route="formatting">
+                <i class="fa-solid fa-font" aria-hidden="true"></i>
+                <span data-i18n="AI Response Formatting">AI Response Formatting</span>
+            </button>
+            <button type="button" class="st-shell-nav-item" data-shell-route="world-info">
+                <i class="fa-solid fa-book-atlas" aria-hidden="true"></i>
+                <span data-i18n="World Info">World Info</span>
+            </button>
+            <button type="button" class="st-shell-nav-item" data-shell-route="persona">
+                <i class="fa-solid fa-face-smile" aria-hidden="true"></i>
+                <span data-i18n="Persona Management">Persona Management</span>
+            </button>
+            <button type="button" class="st-shell-nav-item" data-shell-route="backgrounds">
+                <i class="fa-solid fa-image" aria-hidden="true"></i>
+                <span data-i18n="Backgrounds">Backgrounds</span>
+            </button>
+            <button type="button" class="st-shell-nav-item" data-shell-route="user-settings">
+                <i class="fa-solid fa-gears" aria-hidden="true"></i>
+                <span data-i18n="User Settings">User Settings</span>
+            </button>
+            <button type="button" class="st-shell-nav-item" data-shell-route="extensions">
+                <i class="fa-solid fa-cubes" aria-hidden="true"></i>
+                <span data-i18n="Extensions">Extensions</span>
+            </button>
+            <div id="st-shell-extension-routes"></div>
+        </div>
+    </dialog>
+
     <div id="character_context_menu" class="hidden">
         <ul>
             <li><button id="character_context_menu_favorite" data-i18n="Favorite">Favorite</button></li>
@@ -5991,6 +6151,10 @@
                 </div>
             </div>
             <nav id="right-nav-panel" class="drawer-content closedDrawer fillRight">
+                <button id="st-shell-character-context-close" type="button" class="menu_button st-shell-character-context-close" aria-label="Close character details" title="Close character details" data-i18n="[aria-label]Close character details;[title]Close character details">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    <span class="st-shell-visually-hidden" data-i18n="Close character details">Close character details</span>
+                </button>
                 <div id="right-nav-panelheader" class="fa-solid fa-grip drag-grabber">
                 </div>
                 <div id="CharListButtonAndHotSwaps" class="flex-container flexnowrap">
@@ -8066,7 +8230,7 @@
     </div>
     <div id="sheld">
         <div id="sheldheader" class="fa-solid fa-grip drag-grabber"></div>
-        <div id="chat">
+        <div id="chat" tabindex="-1">
         </div>
         <div id="form_sheld">
             <div id="dialogue_del_mes">
@@ -8203,6 +8367,7 @@
     <script type="module" src="lib/eventemitter.js"></script>
     <script type="module" src="scripts/i18n.js"></script>
     <script type="module" src="script.js"></script>
+    <script type="module" src="scripts/authenticated-shell.js"></script>
     <script>
         window.addEventListener('load', (event) => {
             const documentHeight = () => {

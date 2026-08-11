@@ -2,6 +2,8 @@ import {
     addOneMessage,
     characters,
     chat,
+    chat_metadata,
+    closeCurrentChat,
     deleteCharacterChatByName,
     displayVersion,
     doNewChat,
@@ -44,6 +46,36 @@ const defaultAssistantAvatar = 'default_Assistant.png';
 
 const DEFAULT_MAX_DISPLAYED = 15;
 const DEFAULT_COLLAPSED_DISPLAYED = 3;
+const preservedChatWelcomeAttribute = 'data-shell-preserves-chat';
+let welcomeRequest = 0;
+let chatRevision = 0;
+let latestChatChangeState = null;
+
+function getChatStateSnapshot(chatId = getCurrentChatId()) {
+    return {
+        chatId,
+        metadata: chat_metadata,
+        length: chat.length,
+        firstMessage: chat.at(0),
+        lastMessage: chat.at(-1),
+    };
+}
+
+function chatStatesMatch(first, second) {
+    return first?.chatId === second?.chatId
+        && first?.metadata === second?.metadata
+        && first?.length === second?.length
+        && first?.firstMessage === second?.firstMessage
+        && first?.lastMessage === second?.lastMessage;
+}
+
+function isWelcomeRequestCurrent(request, revision, chatState, nextChatId = getCurrentChatId()) {
+    const notificationConfirmsCapturedState = revision !== chatRevision && chatStatesMatch(chatState, latestChatChangeState);
+    return request === welcomeRequest
+        && chat_metadata === chatState.metadata
+        && nextChatId === chatState.chatId
+        && (revision === chatRevision || notificationConfirmsCapturedState);
+}
 
 /**
  * Gets the current recent chats settings from account storage.
@@ -221,19 +253,22 @@ export function getPermanentAssistantAvatar() {
  * @param {object} param Additional parameters
  * @param {boolean} [param.force] If true, forces clearing of the welcome screen.
  * @param {boolean} [param.expand] If true, expands the recent chats section.
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>} Whether the welcome screen was rendered for the current chat state
  */
 export async function openWelcomeScreen({ force = false, expand = false } = {}) {
     const currentChatId = getCurrentChatId();
     if (currentChatId !== undefined || (chat.length > 0 && !force)) {
-        return;
+        return false;
     }
 
+    const request = ++welcomeRequest;
+    const revision = chatRevision;
+    const currentChatState = getChatStateSnapshot(currentChatId);
     const recentChats = await getRecentChats();
     const chatAfterFetch = getCurrentChatId();
-    if (chatAfterFetch !== currentChatId) {
+    if (!isWelcomeRequestCurrent(request, revision, currentChatState, chatAfterFetch)) {
         console.debug('Chat changed while fetching recent chats.');
-        return;
+        return false;
     }
 
     if (chatAfterFetch === undefined && force) {
@@ -242,10 +277,75 @@ export async function openWelcomeScreen({ force = false, expand = false } = {}) 
         $('#chat').empty();
     }
 
+    const previousPanels = new Set(document.querySelectorAll('#chat > .welcomePanel'));
     await sendWelcomePanel(recentChats, expand);
+    const welcomePanel = Array.from(document.querySelectorAll('#chat > .welcomePanel')).find(panel => !previousPanels.has(panel));
+    if (!(welcomePanel instanceof HTMLElement)) {
+        return false;
+    }
+    if (!isWelcomeRequestCurrent(request, revision, currentChatState)) {
+        welcomePanel?.remove();
+        return false;
+    }
+
     await unshallowPermanentAssistant();
+    if (!isWelcomeRequestCurrent(request, revision, currentChatState)) {
+        welcomePanel?.remove();
+        return false;
+    }
+
     sendAssistantMessage();
     sendWelcomePrompt();
+    return true;
+}
+
+/**
+ * Opens the welcome screen over an active chat without clearing its state or messages.
+ * @param {object} param Additional parameters
+ * @param {boolean} [param.expand] If true, expands the recent chats section
+ * @param {boolean} [param.refresh] If true, replaces an existing preserved-chat welcome screen
+ * @returns {Promise<boolean>} Whether the welcome screen is available after the request
+ */
+export async function openWelcomeScreenOverlay({ expand = false, refresh = false } = {}) {
+    const chatElement = document.getElementById('chat');
+    if (!chatElement) {
+        return false;
+    }
+
+    const existingWelcome = chatElement.querySelector(':scope > .welcomePanel');
+    const existingOverlay = chatElement.querySelector(`:scope > .welcomePanel[${preservedChatWelcomeAttribute}]`);
+    if ((existingOverlay && !refresh) || (existingWelcome && !existingOverlay)) {
+        return true;
+    }
+
+    const currentChatId = getCurrentChatId();
+    const preservesChat = currentChatId !== undefined || chat.some(message => message.extra?.type === system_message_types.ASSISTANT_NOTE);
+    const request = ++welcomeRequest;
+    const revision = chatRevision;
+    const currentChatState = getChatStateSnapshot(currentChatId);
+    const recentChats = await getRecentChats();
+    if (!isWelcomeRequestCurrent(request, revision, currentChatState)) {
+        return false;
+    }
+
+    existingOverlay?.remove();
+    const previousPanels = new Set(chatElement.querySelectorAll(':scope > .welcomePanel'));
+    await sendWelcomePanel(recentChats, expand);
+    const overlay = Array.from(chatElement.querySelectorAll(':scope > .welcomePanel')).find(panel => !previousPanels.has(panel));
+    if (!isWelcomeRequestCurrent(request, revision, currentChatState)) {
+        overlay?.remove();
+        return false;
+    }
+
+    if (preservesChat) {
+        overlay?.setAttribute(preservedChatWelcomeAttribute, '');
+    }
+    return Boolean(overlay);
+}
+
+export function closeWelcomeScreenOverlay() {
+    welcomeRequest++;
+    document.querySelectorAll(`#chat > .welcomePanel[${preservedChatWelcomeAttribute}]`).forEach(panel => panel.remove());
 }
 
 /**
@@ -383,6 +483,10 @@ async function sendWelcomePanel(chats, expand = false) {
         });
         fragment.querySelectorAll('button.openTemporaryChat').forEach((button) => {
             button.addEventListener('click', async () => {
+                const welcomePanel = button.closest('.welcomePanel');
+                if (welcomePanel?.hasAttribute(preservedChatWelcomeAttribute) && !await closeCurrentChat()) {
+                    return;
+                }
                 await newAssistantChat({ temporary: true });
                 if (sendTextArea instanceof HTMLTextAreaElement) {
                     sendTextArea.focus();
@@ -454,7 +558,7 @@ async function sendWelcomePanel(chats, expand = false) {
                 }
                 const currentlyPinned = PinnedChatsManager.isPinned(recentChat);
                 PinnedChatsManager.toggle(recentChat, !currentlyPinned);
-                await refreshWelcomeScreen({ flashChat: recentChat });
+                await refreshWelcomeScreenForPanel(pinButton.closest('.welcomePanel'), { flashChat: recentChat });
             });
         });
         chatElement.append(fragment.firstChild);
@@ -489,6 +593,7 @@ async function openRecentCharacterChat(avatarId, fileName) {
         const currentChatId = getCurrentChatId();
         if (currentChatId === fileName) {
             console.debug(`Chat ${fileName} is already open.`);
+            closeWelcomeScreenOverlay();
             return;
         }
         await openCharacterChat(fileName);
@@ -517,6 +622,7 @@ async function openRecentGroupChat(groupId, fileName) {
         const currentChatId = getCurrentChatId();
         if (currentChatId === fileName) {
             console.debug(`Chat ${fileName} is already open.`);
+            closeWelcomeScreenOverlay();
             return;
         }
         await openGroupChat(groupId, fileName);
@@ -527,11 +633,26 @@ async function openRecentGroupChat(groupId, fileName) {
 }
 
 /**
+ * Refreshes only if the welcome panel that started an operation is still current.
+ * @param {Element|null} welcomePanel Originating welcome panel
+ * @param {object} [options] Refresh options
+ * @param {RecentChat} [options.flashChat] Recent chat to flash
+ */
+async function refreshWelcomeScreenForPanel(welcomePanel, options) {
+    const chatElement = document.getElementById('chat');
+    if (!(welcomePanel instanceof HTMLElement) || welcomePanel.parentElement !== chatElement) {
+        return;
+    }
+    await refreshWelcomeScreen(options);
+}
+
+/**
  * Renames a recent character chat.
  * @param {string} avatarId Avatar file name
  * @param {string} fileName Chat file name
  */
 async function renameRecentCharacterChat(avatarId, fileName) {
+    const welcomePanel = document.querySelector('#chat > .welcomePanel');
     const characterId = characters.findIndex(x => x.avatar === avatarId);
     if (characterId === -1) {
         console.error(`Character not found for avatar ID: ${avatarId}`);
@@ -551,7 +672,7 @@ async function renameRecentCharacterChat(avatarId, fileName) {
             loader: false,
         });
         await updateRemoteChatName(characterId, newName);
-        await refreshWelcomeScreen();
+        await refreshWelcomeScreenForPanel(welcomePanel);
         toastr.success(t`Chat renamed.`);
     } catch (error) {
         console.error('Error renaming recent character chat:', error);
@@ -565,6 +686,7 @@ async function renameRecentCharacterChat(avatarId, fileName) {
  * @param {string} fileName Chat file name
  */
 async function renameRecentGroupChat(groupId, fileName) {
+    const welcomePanel = document.querySelector('#chat > .welcomePanel');
     const group = groups.find(x => x.id === groupId);
     if (!group) {
         console.error(`Group not found for ID: ${groupId}`);
@@ -583,7 +705,7 @@ async function renameRecentGroupChat(groupId, fileName) {
             newFileName: String(newName),
             loader: false,
         });
-        await refreshWelcomeScreen();
+        await refreshWelcomeScreenForPanel(welcomePanel);
         toastr.success(t`Group chat renamed.`);
     } catch (error) {
         console.error('Error renaming recent group chat:', error);
@@ -597,6 +719,7 @@ async function renameRecentGroupChat(groupId, fileName) {
  * @param {string} fileName Chat file name
  */
 async function deleteRecentCharacterChat(avatarId, fileName) {
+    const welcomePanel = document.querySelector('#chat > .welcomePanel');
     const characterId = characters.findIndex(x => x.avatar === avatarId);
     if (characterId === -1) {
         console.error(`Character not found for avatar ID: ${avatarId}`);
@@ -609,7 +732,7 @@ async function deleteRecentCharacterChat(avatarId, fileName) {
             return;
         }
         await deleteCharacterChatByName(String(characterId), fileName);
-        await refreshWelcomeScreen();
+        await refreshWelcomeScreenForPanel(welcomePanel);
         toastr.success(t`Chat deleted.`);
     } catch (error) {
         console.error('Error deleting recent character chat:', error);
@@ -623,6 +746,7 @@ async function deleteRecentCharacterChat(avatarId, fileName) {
  * @param {string} fileName Chat file name
  */
 async function deleteRecentGroupChat(groupId, fileName) {
+    const welcomePanel = document.querySelector('#chat > .welcomePanel');
     const group = groups.find(x => x.id === groupId);
     if (!group) {
         console.error(`Group not found for ID: ${groupId}`);
@@ -635,7 +759,7 @@ async function deleteRecentGroupChat(groupId, fileName) {
             return;
         }
         await deleteGroupChatByName(groupId, fileName);
-        await refreshWelcomeScreen();
+        await refreshWelcomeScreenForPanel(welcomePanel);
         toastr.success(t`Group chat deleted.`);
     } catch (error) {
         console.error('Error deleting recent group chat:', error);
@@ -660,7 +784,18 @@ async function refreshWelcomeScreen({ flashChat = null } = {}) {
     const scrollHeight = chatElement.scrollHeight;
     const expand = chatElement.querySelectorAll('button.showMoreChats.rotated').length > 0;
 
-    await openWelcomeScreen({ force: true, expand });
+    const preservesChat = Boolean(chatElement.querySelector(`:scope > .welcomePanel[${preservedChatWelcomeAttribute}]`));
+    if (preservesChat) {
+        const refreshed = await openWelcomeScreenOverlay({ expand, refresh: true });
+        if (!refreshed) {
+            return;
+        }
+    } else {
+        const refreshed = await openWelcomeScreen({ force: true, expand });
+        if (!refreshed) {
+            return;
+        }
+    }
 
     // Restore scroll position or flash specific chat
     if (flashChat) {
@@ -688,6 +823,7 @@ async function refreshWelcomeScreen({ flashChat = null } = {}) {
  * Opens a popup to configure recent chats settings.
  */
 async function openRecentChatsSettingsPopup() {
+    const welcomePanel = document.querySelector('#chat > .welcomePanel');
     const settings = getRecentChatsSettings();
 
     const MIN_CHATS = 1;
@@ -736,7 +872,7 @@ async function openRecentChatsSettingsPopup() {
         },
     });
 
-    await refreshWelcomeScreen();
+    await refreshWelcomeScreenForPanel(welcomePanel);
 }
 
 /**
@@ -925,10 +1061,12 @@ export function assignCharacterAsAssistant(characterId) {
 export function initWelcomeScreen() {
     PinnedChatsManager.init();
 
-    const events = [event_types.CHAT_CHANGED, event_types.APP_READY];
-    for (const event of events) {
-        eventSource.makeFirst(event, openWelcomeScreen);
-    }
+    eventSource.makeFirst(event_types.CHAT_CHANGED, (chatId) => {
+        chatRevision++;
+        latestChatChangeState = getChatStateSnapshot(chatId);
+        return openWelcomeScreen();
+    });
+    eventSource.makeFirst(event_types.APP_READY, openWelcomeScreen);
 
     eventSource.on(event_types.CHARACTER_MANAGEMENT_DROPDOWN, (target) => {
         if (target !== 'set_as_assistant') {
